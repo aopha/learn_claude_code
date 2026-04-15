@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据表格 - 主页</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>用户数据表格</h1>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>姓名</th>
+                    <th>邮箱</th>
+                    <th>部门</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        const DATA_COUNT = 80;
+        const PAGE_SIZE = 10;
+        const PAGE_COUNT = 8;
+
+        const departments = ['研发部', '市场部', '财务部', '人力资源', '行政部', '销售部', '客服部', '运营部'];
+        const statuses = ['在职', '离职', '休假中', '出差中'];
+        const names = ['张伟', '王芳', '李明', '刘洋', '陈静', '杨帆', '赵雷', '周琳', '吴昊', '郑雪',
+                       '孙杰', '马超', '朱婷', '胡磊', '林峰', '何云', '高健', '罗斌', '郭峰', '梁宇'];
+
+        function generateData() {
+            const data = [];
+            for (let i = 1; i <= DATA_COUNT; i++) {
+                data.push({
+                    id: i,
+                    name: names[(i - 1) % names.length] + i,
+                    email: `user${i}@example.com`,
+                    department: departments[(i - 1) % departments.length],
+                    status: statuses[(i - 1) % statuses.length]
+                });
+            }
+            return data;
+        }
+
+        const allData = generateData();
+        let currentPage = 1;
+
+        function renderTable(page) {
+            const start = (page - 1) * PAGE_SIZE;
+            const end = start + PAGE_SIZE;
+            const pageData = allData.slice(start, end);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = pageData.map(row => `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.name}</td>
+                    <td>${row.email}</td>
+                    <td>${row.department}</td>
+                    <td>${row.status}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            let html = '';
+
+            html += `<button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>首页</button>`;
+            html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+
+            for (let i = 1; i <= PAGE_COUNT; i++) {
+                html += `<button class="page-num ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+
+            html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === PAGE_COUNT ? 'disabled' : ''}>下一页</button>`;
+            html += `<button onclick="goToPage(${PAGE_COUNT})" ${currentPage === PAGE_COUNT ? 'disabled' : ''}>末页</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            if (page < 1 || page > PAGE_COUNT) return;
+            currentPage = page;
+            renderTable(page);
+            renderPagination();
+        }
+
+        function checkLogin() {
+            if (!sessionStorage.getItem('isLoggedIn')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+        checkLogin();
+        renderTable(1);
+        renderPagination();
+    </script>
+</body>
+</html>
